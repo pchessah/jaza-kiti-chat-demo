@@ -1,93 +1,67 @@
 # Jaza Kiti Chat Backend
 
-A FastAPI backend for a chat system that integrates with Google Firestore for message storage and the Gemini API for admin responses. The project is structured according to SOLID principles for maintainability and scalability.
+A robust FastAPI backend for the Jaza Kiti Chat system, featuring modular architecture, SOLID principles, and integration with Supabase for message storage and Gemini API for AI-powered admin responses.
 
 ## Features
-- Store and retrieve chat messages in Firestore
-- Generate admin responses using Gemini API
-- Modular, testable, and SOLID-compliant architecture
-- Input validation and robust error handling
+- **Supabase Storage:** Stores and retrieves chat messages using Supabase.
+- **Gemini AI Integration:** Generates admin responses using Google Gemini API.
+- **Input Validation:** Pydantic models for request/response validation.
+- **Error Handling:** Robust error management for all endpoints.
+- **CORS Support:** Configured for frontend integration.
 
 ## Project Structure
 ```
-.
-├── main.py
-├── routers/
-│   └── messages.py
-├── services/
-│   ├── firestore_service.py
-│   └── gemini_service.py
-├── models/
-│   └── message.py
-├── config/
-│   └── settings.py
-├── dependencies.py
-├── requirements.txt
-├── README.md
-├── tests/
-│   ├── test_firestore_service.py
-│   └── test_gemini_service.py
+backend/
+  main.py                  # FastAPI app entry point
+  routers/
+    messages.py            # Message-related API endpoints
+  services/
+    supabase_service.py    # Supabase message storage logic
+    gemini_service.py      # Gemini AI response logic
+  models/
+    message.py             # Pydantic models for chat
+  config/
+    settings.py            # Environment/config management
+  dependencies.py          # Dependency injection
+  requirements.txt         # Python dependencies
+  tests/
+    test_firestore_service.py
+    test_gemini_service.py
+  README.md
 ```
 
-## SOLID Principles Applied
-- **Single Responsibility:** Each module/class has one responsibility (e.g., FirestoreService only handles Firestore logic).
-- **Open/Closed:** Services and models are extensible via dependency injection and interfaces.
-- **Liskov Substitution:** Service interfaces allow for interchangeable implementations.
-- **Interface Segregation:** Specific interfaces for each service.
-- **Dependency Inversion:** Dependencies are injected, not hardcoded.
+## How to Run
+1. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. **Set up environment variables:**
+   - Create a `.env` file in `backend/` with:
+     ```
+     GEMINI_API_KEY=your_gemini_api_key
+     SUPABASE_URL=your_supabase_url
+     SUPABASE_KEY=your_supabase_key
+     ```
+   - Obtain a Gemini API key from Google AI Studio.
+   - Get your Supabase project URL and service key from the Supabase dashboard.
 
-## Setup Instructions
-
-### 1. Clone the repository
-```
-git clone <repo-url>
-cd jaza-kiti-chat-backend
-```
-
-### 2. Create and activate a virtual environment
-```
-python -m venv venv
-# On Windows:
-venv\Scripts\activate
-# On Unix/Mac:
-source venv/bin/activate
-```
-
-### 3. Install dependencies
-```
-pip install -r requirements.txt
-```
-
-### 4. Environment Variables
-Create a `.env` file in the root directory with the following:
-```
-GEMINI_API_KEY=your_gemini_api_key
-GOOGLE_APPLICATION_CREDENTIALS=path/to/your/service-account.json
-```
-- Obtain a Gemini API key from Google AI Studio.
-- Download your Firestore service account JSON and set the path above.
-
-### 5. Firestore Setup
-- Create a Firestore database in Google Cloud.
-- Ensure your service account has read/write access to Firestore.
-- Recommended: Create indexes on `email` and `timestamp` for the `messages` collection.
-
-### 6. Running the App
-```
-uvicorn main:app --reload
-```
+3. **Run the development server:**
+   ```bash
+   uvicorn main:app --reload
+   ```
+4. **API available at:** [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
 ## API Endpoints
 
 ### POST `/messages/check`
 **Request:**
-```
+```json
 {
   "email": "user@example.com"
 }
 ```
 **Response:**
-```
+```json
 {
   "messages": [
     {
@@ -104,7 +78,7 @@ uvicorn main:app --reload
 
 ### POST `/messages/send`
 **Request:**
-```
+```json
 {
   "email": "user@example.com",
   "phone_number": "1234567890",
@@ -112,25 +86,42 @@ uvicorn main:app --reload
 }
 ```
 **Response:**
-```
+```json
 {
   "user_message": { ... },
   "admin_response": { ... }
 }
 ```
 
+## Usage
+- The backend expects requests from the frontend at `http://127.0.0.1:3000` by default.
+- Handles user and admin messages, storing all chat history in Supabase.
+- Admin responses are generated in real-time using Gemini AI.
+
 ## Testing
 Run all tests with:
-```
+```bash
 pytest
 ```
 
-## Security
-- All sensitive data is managed via environment variables.
-- Firestore security rules should restrict access to authorized users (see Google documentation).
+## Configuration
+- All sensitive data is managed via environment variables in `.env`.
+- See `config/settings.py` for details on configuration loading.
+
+## Dependencies
+- fastapi
+- uvicorn
+- google-genai
+- pydantic
+- pydantic-settings
+- python-dotenv
+- pytest
+- httpx
+- email-validator
+- supabase
 
 ## Example Gemini API Integration
-```
+```python
 from google import genai
 client = genai.Client(api_key="GEMINI_API_KEY")
 response = client.models.generate_content(
@@ -138,7 +129,4 @@ response = client.models.generate_content(
     contents=["How does AI work?"]
 )
 print(response.text)
-```
-
-## License
-MIT 
+``` 
